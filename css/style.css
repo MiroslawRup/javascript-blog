@@ -104,7 +104,41 @@ body {
   display: flex;
 }
 
+.post-tags li {
+  margin-right: 3px;
+}
+
 .post-tags p {
   margin: 0 10px 0 0;
+}
+
+.sidebar .tags li, .sidebar .authors li {
+  display: inline-block;
+  margin-right: 3px;
+}
+
+.sidebar .tags .cloud-size-1, .sidebar .authors .cloud-size-1 {
+  font-size: 100%;
+  color: RGB(0, 0, 55);
+}
+
+.sidebar .tags .cloud-size-2, .sidebar .authors .cloud-size-2 {
+  font-size: 125%;
+  color: RGB(0, 0, 105);
+}
+
+.sidebar .tags .cloud-size-3, .sidebar .authors .cloud-size-3 {
+  font-size: 150%;
+  color: RGB(0, 0, 155);
+}
+
+.sidebar .tags .cloud-size-4, .sidebar .authors .cloud-size-4 {
+  font-size: 175%;
+  color: RGB(0, 0, 205);
+}
+
+.sidebar .tags .cloud-size-5, .sidebar .authors .cloud-size-5 {
+  font-size: 200%;
+  color: RGB(0, 0, 255);
 }
 /*# sourceMappingURL=style.css.map */

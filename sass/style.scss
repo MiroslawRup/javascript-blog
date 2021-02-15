@@ -117,8 +117,40 @@ body {
 
 .post-tags {
   display: flex;
+  li {
+    margin-right: 3px;
+  }
 
   p {
     margin: 0 10px 0 0;
+  }
+}
+
+.sidebar {
+  .tags, .authors {
+    li {
+      display: inline-block;
+      margin-right: 3px;
+    }
+    .cloud-size-1 {
+      font-size: 100%;
+      color: RGB(0, 0, 55);
+    }
+    .cloud-size-2 {
+      font-size: 125%;
+      color: RGB(0, 0, 105);
+    }
+    .cloud-size-3 {
+      font-size: 150%;
+      color: RGB(0, 0, 155);
+    }
+    .cloud-size-4 {
+      font-size: 175%;
+      color: RGB(0, 0, 205);
+    }
+    .cloud-size-5 {
+      font-size: 200%;
+      color: RGB(0, 0, 255);
+    }
   }
 }
