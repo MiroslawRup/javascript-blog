@@ -2,14 +2,21 @@
 
   'use strict';
 
+  const templates = {
+    articleLink: Handlebars.compile(document.querySelector('#template-article-link').innerHTML),
+    tagLink: Handlebars.compile(document.querySelector('#template-tag-link').innerHTML),
+    authorLink: Handlebars.compile(document.querySelector('#template-author-link').innerHTML),
+    tagCloudLink: Handlebars.compile(document.querySelector('#template-tag-cloud-link').innerHTML),
+    authorCloudLink: Handlebars.compile(document.querySelector('#template-author-cloud-link').innerHTML),
+  };
+
   /* STAŁE */
   const optArticleSelector = '.post',
     optTitleSelector = '.post-title',
     optTitleListSelector = '.titles',
     optArticleTagsSelector = '.post-tags .list',
     optArticleAuthorSelector = '.post-author',
-    optCloudClassCount = 5,
-    optCloudClassPrefix = 'cloud-size-';
+    optCloudClassCount = 5;
 
   /* UTWORZENIE LISTY TYTUŁÓW POSTÓW (JAKO LISTA LINKÓW) NA PODSTAWIE ISTNIEJĄCYCH ARTYKUŁÓW W HTML */
   /* argument funkcji customSelector = '' jest wstawiony do wykorzystania przez inne funkcje tj. tagClickHandler i authorClickHandler czyli po kliknięciu linków tagu lub linku autora lista postów jest filtrowana */
@@ -22,7 +29,8 @@
     for (let article of articles) {   /* pętla przez wszystkie artykuły (posty) */
       const articleID = article.getAttribute('id');   /* pobranie id postu */
       const articleTitle = article.querySelector(optTitleSelector).innerHTML;   /* pobranie tytułu postu */
-      const linkHTML = '<li><a href="#' + articleID + '"><span>' + articleTitle + '</span></a></li>'; /* utworzenie linku danego postu w postaci HTML */
+      const linkHTMLData = {id: articleID, title: articleTitle};   /* tworzenie obiektu z danymi do przekazania do szablonu handlebars */
+      const linkHTML = templates.articleLink(linkHTMLData);   /* utworzenie linku danego postu w postaci HTML z szablonu handlebars */
       html = html + linkHTML;   /* budowanie wszystkich linków listy tytułów postów w kolejnych krokach pętli */
     }
     titleList.innerHTML = html;   /* wstawienie listy linków (HTML) w odpowiednie miejsce */
@@ -93,7 +101,8 @@
       const articleTags = article.getAttribute('data-tags');   /* pobranie tagów z HTML (odzielone spacją) */
       const articleTagsArray = articleTags.split(' ');   /* utworzenie tablicy tagów - z pozbyciem się spacji */
       for (let tag of articleTagsArray) {   /* pętla po tablicy tagów danego artykułu */
-        const linkHTML = '<li><a href="#tag-' + tag + '">' + tag + '</a></li>';   /* utworzenie kodu HTML z danym tagiem */
+        const linkHTMLData = {tag: tag};   /* tworzenie obiektu z danymi do przekazania do szablonu handlebars */
+        const linkHTML = templates.tagLink(linkHTMLData);   /* utworzenie kodu HTML z danym tagiem z szablonu handlebars */
         html = html + linkHTML;   /* dodanie kodu tagu do kodu zbioru tagów w danym artykule */
         if (!allTags[tag]) {   /* sprawdzanie czy w obiekcie jest już dany tag jako klucz obiektu */
           allTags[tag] = 1;   /* jeżeli nie było nadaje temu kluczowi taga wartość 1 */
@@ -104,13 +113,16 @@
       tagsWrapper.innerHTML = html;   /* wstawienie wygenerowanego kodu HTML na końcu artykułu/postu */
     }
     const tagsParams = calculateParams(allTags);   /* wywołanie funkcji do obliczenia minimalnej i maksymalnej liczby wystąpień tagów */
-    let allTagsHTML = '';   /* deklaracja zmiennej typu string  */
-    for (let tag in allTags) {     /* pętla na obiekcie zawierajacym tagi i ich liczbę wystąpień */
-      const tagLinkHTML = '<li><a class="' + optCloudClassPrefix + calculateClass(allTags[tag], tagsParams) + '" href="#tag-' + tag + '">' + tag + '</a></li>';   /* tworzenie kodu HTML danego tagu do chmury tagów (z wywołaniem funkcji ustaljącej klasy wysokosci czcionki w chmurze) */
-      allTagsHTML += tagLinkHTML;   /* budowanie całego kodu HTML chmury tagów */
+    const allTagsData = {tags: []};
+    for (let tag in allTags) {    /* pętla na obiekcie zawierajacym tagi i ich liczbę wystąpień */
+      allTagsData.tags.push( {    /* budowanie całego kodu HTML chmury tagów w obiekcie */
+        tag: tag,
+        count: allTags[tag],
+        className: calculateClass(allTags[tag], tagsParams),
+      });
     }
     const tagList = document.querySelector('.tags');   /* ustalenie miejsca w HTML na chmurę tagów */
-    tagList.innerHTML = allTagsHTML;   /* wstawienie wygenerowanego kodu HTML do miejsca chmury tagów */
+    tagList.innerHTML = templates.tagCloudLink(allTagsData);   /* wstawienie wygenerowanego kodu HTML do miejsca chmury tagów */
   };
 
   /* DZIAŁANIE PO KLIKNIĘCIU USERA W TAG POD ARTYKUŁEM */
@@ -155,7 +167,8 @@
     for (let article of articles) {    /* pętla przez wszystkie artykuły (posty) */
       const authorsWrapper = article.querySelector(optArticleAuthorSelector);   /* ustalenie miejsca w HTML na autora pod każdym tytułem artykułu (postem) */
       const articleAuthors = article.getAttribute('data-author');    /* pobranie danych o autorze z HTML */
-      const html = '<a href="#author-' + articleAuthors + '">' + articleAuthors + '</a>';     /* utworzenie kodu HTML z danym autorem (link) */
+      const htmlData = {author: articleAuthors};   /* tworzenie obiektu z danymi do przekazania do szablonu handlebars */
+      const html = templates.authorLink(htmlData);   /* utworzenie kodu HTML z danym autorem z szablonu handlebars */
       if (!allAuthors[articleAuthors]) {   /* sprawdzanie czy w obiekcie jest już dany autor jako klucz obiektu */
         allAuthors[articleAuthors] = 1;    /* jeżeli nie było nadaje temu kluczowi taga wartość 1 */
       } else {
@@ -165,13 +178,16 @@
     }
 
     const authorsParams = calculateParams(allAuthors);   /* wywołanie funkcji do obliczenia minimalnej i maksymalnej liczby wystąpień autorów */
-    let allAuthorsHTML = '';   /* deklaracja zmiennej typu string  */
+    const allAuthorsData = {authors: []};
     for (let author in allAuthors) {     /* pętla na obiekcie zawierajacym autorów i ich liczbę wystąpień */
-      const tagLinkHTML = '<li><a class="' + optCloudClassPrefix + calculateClass(allAuthors[author], authorsParams) + '" href="#author-' + author + '">' + author + '</a></li>';   /* tworzenie kodu HTML danego autora do chmury autorów (z wywołaniem funkcji ustaljącej klasy wysokosci czcionki w chmurze) */
-      allAuthorsHTML += tagLinkHTML;   /* budowanie całego kodu HTML chmury autorów */
+      allAuthorsData.authors.push( {    /* budowanie całego kodu HTML chmury tagów w obiekcie */
+        author: author,
+        count: allAuthors[author],
+        className: calculateClass(allAuthors[author], authorsParams),
+      } );
     }
     const authorList = document.querySelector('.authors');      /* ustalenie miejsca w HTML na chmurę autorów */
-    authorList.innerHTML = allAuthorsHTML;   /* wstawienie wygenerowanego kodu HTML do miejsca chmury tagów */
+    authorList.innerHTML = templates.authorCloudLink(allAuthorsData);   /* wstawienie wygenerowanego kodu HTML do miejsca chmury tagów */
   };
 
   /* DZIAŁANIE PO KLIKNIĘCIU USERA W AUTORA POD TYTUŁEM ARTYKUŁU */
